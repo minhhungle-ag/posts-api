@@ -1,12 +1,21 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const mongoose = require("mongoose");
 
 const postRouters = require("./api/routes/post");
-//mongodb://localhost:27017
+const uploadRouters = require("./api/routes/upload");
+
 const app = express();
 
+mongoose.connect("mongodb://localhost:27017", () => {
+  console.log("connect mongoose success");
+});
+
+mongoose.Promise = global.Promise;
+
 app.use(morgan("dev"));
+app.use("/uploads", express.static("uploads"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -26,6 +35,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/posts", postRouters);
+app.use("/api/upload", uploadRouters);
 
 app.use((req, res, next) => {
   const error = new Error("Not found");

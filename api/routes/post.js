@@ -1,46 +1,153 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 
-// "id": "lea2aa9l7x3a5tg",
-// "title": "Iure aperiam unde",
-// "author": "Freddie Zieme",
-// "description": "dolor fuga animi dolore voluptatum aliquam qui doloremque quibusdam similique et officiis sit alias rerum et dolorem necessitatibus rerum quisquam iusto nostrum ut officiis inventore velit voluptates possimus laudantium rerum dolores aut sint velit nisi odio laborum ut tempora nisi hic omnis consequatur et atque voluptas possimus officia voluptatum animi",
-// "createdAt": 1662885819124,
-// "updatedAt": 1665734726981,
-// "imageUrl": "https://picsum.photos/id/624/1368/400"
+const Post = require("../models/post");
+
+const currentLimit = 5;
+const currentPage = 1;
 
 router.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Get all success",
-  });
+  if (req.query.page <= 0) {
+    res.status(500).json({
+      message: "page must be more than 0",
+    });
+  }
+
+  Post.find()
+    .select("title author updatedAt createAt imageUrl")
+    .exec()
+    .then((data) => {
+      if (Array.isArray(data)) {
+        const page = req.query.page || currentPage;
+        const limit = req.query.limit || currentLimit;
+        const startIdx = ((req.query.page || page) - 1) * limit;
+
+        const postList = [...data];
+        const totalPage = Math.ceil(postList.length / limit);
+        const total = postList.length;
+
+        postList.slice(startIdx, limit);
+
+        res.status(200).json({
+          message: "get all success",
+          data: postList,
+          pagination: {
+            page: page,
+            limit: limit,
+            total: total,
+            total_page: totalPage,
+          },
+        });
+      }
+    });
 });
 
 router.get("/:postId", (req, res) => {
   const postId = req.params.postId;
 
-  res.status(200).json({
-    message: `Get post by ${postId}`,
-  });
+  Post.findById(postId)
+    .select("title author updatedAt createAt imageUrl")
+    .exec()
+    .then((response) => {
+      console.log("response: ", response);
+      if (response) {
+        res.status(200).json({
+          message: `get by ${postId} success`,
+          data: response,
+        });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(400).json({
+        error: {
+          message: error.message,
+        },
+      });
+    });
 });
 
 router.post("/", (req, res) => {
-  res.status(200).json({
-    message: "Add something success",
+  const post = new Post({
+    _id: new mongoose.Types.ObjectId(),
+    title: req.body.title,
+    author: req.body.author,
+    description: req.body.description,
+    createAt: new Date(),
+    imageUrl: req.body.imageUrl,
   });
+
+  post
+    .save()
+    .then((result) => {
+      if (result) {
+        res.status(200).json({
+          data: result,
+        });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(400).json({
+        error: {
+          message: error.message,
+        },
+      });
+    });
 });
 
 router.patch("/:postId", (req, res) => {
   const postId = req.params.postId;
-  res.status(200).json({
-    message: `Edit post by ${postId}`,
-  });
+
+  Post.updateOne(
+    { _id: postId },
+    {
+      $set: {
+        title: req.body.title,
+        author: req.body.author,
+        description: req.body.description,
+        updatedAt: new Date(),
+        imageUrl: req.body.imageUrl,
+      },
+    }
+  )
+    .exec()
+    .then((response) => {
+      res.status(200).json({
+        message: `Edit post success`,
+        data: response,
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(400).json({
+        error: {
+          message: error.message,
+        },
+      });
+    });
 });
 
 router.delete("/:postId", (req, res) => {
   const postId = req.params.postId;
-  res.status(200).json({
-    message: `Deleted post by ${postId}`,
-  });
+
+  Post.remove({ _id: postId })
+    .exec()
+    .then((response) => {
+      res.status(200).json({
+        message: `Deleted post by ${postId}`,
+        data: response,
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(400).json({
+        error: {
+          message: error.message,
+        },
+      });
+    });
 });
 
 module.exports = router;
