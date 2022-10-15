@@ -24,17 +24,17 @@ router.get("/", (req, res) => {
       if (Array.isArray(data)) {
         const page = req.query.page || currentPage;
         const limit = req.query.limit || currentLimit;
-        const startIdx = ((req.query.page || page) - 1) * limit;
+        const startIdx = (page - 1) * limit;
 
         const userList = [...data];
         const totalPage = Math.ceil(userList.length / limit);
         const total = userList.length;
 
-        userList.slice(startIdx, limit);
+        const newUserList = userList.slice(startIdx, limit);
 
         res.status(200).json({
           message: "get all success",
-          data: userList,
+          data: newUserList,
           pagination: {
             page: page,
             limit: limit,
