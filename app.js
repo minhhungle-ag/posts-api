@@ -11,9 +11,10 @@ const appConstants = require("./constants/appConstants");
 const app = express();
 
 mongoose.connect(
-  `mongodb+srv://haless132:${appConstants.MONGODB_ATLAS_PW}@cluster0.cd3xddc.mongodb.net/?retryWrites=true&w=majority`,
+  "mongodb://localhost:27017",
+  //`mongodb+srv://haless132:${appConstants.MONGODB_ATLAS_PW}@cluster0.cd3xddc.mongodb.net/?retryWrites=true&w=majority`,
   () => {
-    console.log("connect mongoose success"); //  "mongodb://localhost:27017"
+    console.log("connect mongoose success");
   }
 );
 
