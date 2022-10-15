@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const router = express.Router();
 
 const Post = require("../models/post");
-const checkAuth = require("../middleware/check-auth");
+const checkAuth = require("../middleware/checkAuth");
 
 const currentLimit = 5;
 const currentPage = 1;
