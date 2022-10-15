@@ -22,22 +22,24 @@ router.get("/", (req, res) => {
       if (Array.isArray(data)) {
         const page = req.query.page || currentPage;
         const limit = req.query.limit || currentLimit;
-        const startIdx = ((req.query.page || page) - 1) * limit;
+        const startIdx = (page - 1) * limit;
 
         const postList = [...data];
         const totalPage = Math.ceil(postList.length / limit);
         const total = postList.length;
 
-        postList.slice(startIdx, limit);
+        const newPostList = postList.slice(startIdx, limit);
 
         res.status(200).json({
-          message: "get all success",
-          data: postList,
-          pagination: {
-            page: page,
-            limit: limit,
-            total: total,
-            total_page: totalPage,
+          data: {
+            message: "get all success",
+            data: newPostList,
+            pagination: {
+              page: page,
+              limit: limit,
+              total: total,
+              total_page: totalPage,
+            },
           },
         });
       }
