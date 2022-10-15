@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const router = express.Router();
 
 const Post = require("../models/post");
+const checkAuth = require("../middleware/check-auth");
 
 const currentLimit = 5;
 const currentPage = 1;
@@ -15,7 +16,7 @@ router.get("/", (req, res) => {
   }
 
   Post.find()
-    .select("title author updatedAt createAt imageUrl")
+    .select("title author updatedAt createAt description imageUrl")
     .exec()
     .then((data) => {
       if (Array.isArray(data)) {
@@ -68,7 +69,7 @@ router.get("/:postId", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
+router.post("/", checkAuth, (req, res) => {
   const post = new Post({
     _id: new mongoose.Types.ObjectId(),
     title: req.body.title,
@@ -97,7 +98,7 @@ router.post("/", (req, res) => {
     });
 });
 
-router.patch("/:postId", (req, res) => {
+router.patch("/:postId", checkAuth, (req, res) => {
   const postId = req.params.postId;
 
   Post.updateOne(
@@ -129,7 +130,7 @@ router.patch("/:postId", (req, res) => {
     });
 });
 
-router.delete("/:postId", (req, res) => {
+router.delete("/:postId", checkAuth, (req, res) => {
   const postId = req.params.postId;
 
   Post.remove({ _id: postId })

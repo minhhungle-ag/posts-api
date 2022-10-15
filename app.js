@@ -5,12 +5,17 @@ const mongoose = require("mongoose");
 
 const postRouters = require("./api/routes/post");
 const uploadRouters = require("./api/routes/upload");
+const userRouters = require("./api/routes/user");
+const appConstants = require("./constants/appConstants");
 
 const app = express();
 
-mongoose.connect("mongodb://localhost:27017", () => {
-  console.log("connect mongoose success");
-});
+mongoose.connect(
+  `mongodb+srv://haless132:${appConstants.MONGODB_ATLAS_PW}@cluster0.cd3xddc.mongodb.net/?retryWrites=true&w=majority`,
+  () => {
+    console.log("connect mongoose success"); //  "mongodb://localhost:27017"
+  }
+);
 
 mongoose.Promise = global.Promise;
 
@@ -36,6 +41,7 @@ app.use((req, res, next) => {
 
 app.use("/api/posts", postRouters);
 app.use("/api/upload", uploadRouters);
+app.use("/api/user", userRouters);
 
 app.use((req, res, next) => {
   const error = new Error("Not found");
